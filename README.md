@@ -3,19 +3,19 @@
 ## Setup Guide
 Clone this repo:
 ```shell
-git clone git@github.com:toriwood/chat-app.git
+git clone git@github.com:tori-wood/chat-app.git
+cd chat-app
 ```
 
 bundle install and set up the database:
 ```shell
-cd /path/to/repo
 bundle install
 bundle exec rake db:create && bundle exec rake db:create RAILS_ENV=test
 bundle exec rake db:migrate && bundle exec rake db:migrate RAILS_ENV=test
 bundle exec rake db:seed
 ```
 
-ActionCable uses redis locally, you'll need to install that if you don't already have it. On MacOS, this can be done with homebrew:
+ActionCable uses redis locally, so you'll need to install that if you don't already have it. On MacOS, this can be done with homebrew:
 ```shell
 brew install redis
 ```
@@ -30,12 +30,12 @@ Start up the rails server and navigate to `localhost:3000` in the browser:
 rails s
 ```
 You'll be presented with a list of usernames to choose from. Once you pick a user name, you'll see the conversations that user is associated with:
-![User Screen](public/users.png)
+<br><img src="public/users.png" width="30%">
 
-![Conversations Screen](public/conversations.png)
+<img src="public/conversations.png" width="30%">
 
-Then upon clicking on a conversation, you'll be redirected to the conversation window, where you can see other users in this conversation and previous messages. You can also send and receive messages from fellow participants in the chat:
-![Conversation Screen](public/conversation_window.png)
+Upon clicking on a conversation, you'll be redirected to the conversation window, where you can see other users in this conversation and previous messages. You can also send and receive messages from fellow participants in the chat:
+<br><img src="public/conversation_window.png" width="60%">
 
 ## Design
 The app has a few core models:
@@ -57,15 +57,15 @@ Once a user has identified themselves, they're presented with a list of conversa
 ## Design Decisions & Challenges
 
 ### Early Design Decisions
-Given the simple nature of this application, I originally considered using DynamoDB as the data store. My thought was that the message structure would be really simple, needing only to track the two users involved in the chat, the message between them, and a timestamp. I couldn't help but think about how that would scale. If there was ever a desire to allow multiple users in a chat conversation, that design would break down pretty quickly.
+Given the simple nature of this application, I originally considered using DynamoDB as the data store. My thought was that the message structure would be really simple, needing only to track the two users involved in the chat, the message between them, and a timestamp. I couldn't help but think about how that would scale. If there was ever a desire to allow multiple users in a chat conversation, that simple design would break down pretty quickly.
 
 The more I thought about it, the more the data seemed to fit better into a relational model. And although it's not required, I wanted the structure to be in place to allow more than two users to be involved in a conversation.
 
-I decided to use Rails since it's comfortable for me and I knew I'd be able to get started quickly. I also thought WebSockets would be key to the "real-time" nature of the chat conversation. Although I hadn't used it yet, ActionCable is available to get up and running with WebSockets pretty easily as of Rails 5.
+I decided to use Rails since it's comfortable for me and I knew I'd be able to get started quickly. I also thought WebSockets would be key to the real-time nature of the chat conversation. Although I hadn't used it yet, ActionCable is available to get up and running with WebSockets pretty easily as of Rails 5.
 
 ### Challenges
-1. A pretty frustrating setback happened for me with ActionCable during my  initial setup and testing. I was using `async` for my development environment since that is the default. I'd already wired up my `ConverationChannel`, had my current conversation messages showing in the browser, and had my page subscribed to the channel with code to append new messages when they were received. I thought I'd broadcast a message and see it appear in the browser. In reality, I would broadcast a message from the console, see output in the console notifying me of the message being sent to the conversation channel, but nothing would be appended in the browser.
+1. A pretty frustrating setback happened for me with ActionCable during my initial setup and testing. I was using `async` for my development environment since that is the default. I'd already wired up my `ConversationChannel`, had my current messages showing in the browser, and had my page subscribed to the channel with code to append new messages when they were received. I thought I'd broadcast a message from the console and see it appear in the browser. In reality, I would broadcast a message, see output in the console notifying me of the message being sent to the channel, but nothing would be appended in the browser.
 
-    Ultimately, I realized that because the rails console and the rails server were running on different processes, they were actually using two different instances of the async adapter. Switching to redis locally allowed me to use a centralized data source for both the console and browser. If I'd only been testing in the browser, async would have worked perfectly fine.
+    Ultimately, I realized that because the rails console and the rails server were running on different processes, they were actually using two different instances of the async adapter. Switching to redis locally allowed me to use a centralized data source for both the console and browser. If I'd only been testing in the browser and not the console, async would have worked perfectly fine.
 
-2. Given more time, authentication would easily allow cleaning up some things I had to do in order to get this design to work without having logged_in users.
+2. Given more time, authentication would easily allow cleaning up some things I had to do in order to get this design to work without having logged in users.
